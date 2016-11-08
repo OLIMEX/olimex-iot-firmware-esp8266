@@ -18,6 +18,12 @@ SPI_SPEED?=40
 SPI_MODE?=QIO
 SPI_SIZE_MAP?=3
 
+ifeq ($(DEVICE), 0)
+	BIN_DIR="bin/upgrade"
+else
+	BIN_DIR="bin/upgrade/$(DEVICE)"
+endif
+
 ifeq ($(COMPILE), gcc)
 	AR = xtensa-lx106-elf-ar
 	CC = xtensa-lx106-elf-gcc
@@ -247,10 +253,10 @@ ifeq ($(APP), 0)
 	@$(OBJDUMP) -x -s $< > ../bin/eagle.dump
 	@$(OBJDUMP) -S $< > ../bin/eagle.S
 else
-	mkdir -p ../bin/upgrade
-	@$(RM) -r ../bin/upgrade/$(BIN_NAME).S ../bin/upgrade/$(BIN_NAME).dump
-	@$(OBJDUMP) -x -s $< > ../bin/upgrade/$(BIN_NAME).dump
-	@$(OBJDUMP) -S $< > ../bin/upgrade/$(BIN_NAME).S
+	mkdir -p ../$(BIN_DIR)
+	@$(RM) -r ../$(BIN_DIR)/$(BIN_NAME).S ../$(BIN_DIR)/$(BIN_NAME).dump
+	@$(OBJDUMP) -x -s $< > ../$(BIN_DIR)/$(BIN_NAME).dump
+	@$(OBJDUMP) -S $< > ../$(BIN_DIR)/$(BIN_NAME).S
 endif
 
 	@$(OBJCOPY) --only-section .text -O binary $< eagle.app.v6.text.bin
@@ -288,9 +294,9 @@ else
         endif
     endif
 
-	@mv eagle.app.flash.bin ../bin/upgrade/$(BIN_NAME).bin
+	@mv eagle.app.flash.bin ../$(BIN_DIR)/$(BIN_NAME).bin
 	@rm eagle.app.v6.*
-	@echo "Generate $(BIN_NAME).bin successully in folder bin/upgrade."
+	@echo "Generate $(BIN_NAME).bin successully in folder $(BIN_DIR)."
 	@echo "boot.bin------------>0x00000"
 	@echo "$(BIN_NAME).bin--->$(addr)"
 endif
